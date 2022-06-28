@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import  Response
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, status, permissions
 
@@ -21,11 +21,8 @@ class RegistrationView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
-    
 
-      
 class LoginView(APIView):
     def post(self, request):
         if 'email' not in request.data or 'password' not in request.data:
@@ -39,24 +36,24 @@ class LoginView(APIView):
             return Response({'msg': 'Login Success', **auth_data}, status=status.HTTP_200_OK)
         return Response({'msg': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-      
+
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
         return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
 
 
-      
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def post(self, request):
-        serializer = PasswordChangeSerializer(context={'request': request}, data=request.data)
-        serializer.is_valid(raise_exception=True) #Another way to write is as in Line 17
+        serializer = PasswordChangeSerializer(
+            context={'request': request}, data=request.data)
+        # Another way to write is as in Line 17
+        serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data['new_password'])
         request.user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 class UserList(generics.ListAPIView):
