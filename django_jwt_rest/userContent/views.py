@@ -1,16 +1,13 @@
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status
 
 from .models import MyUser
 from .utils import get_tokens_for_user
-from .serializers import RegistrationSerializer, PasswordChangeSerializer, UserSerializer
+from .serializers import RegistrationSerializer, UserSerializer, UpdateUserSerializer
 # Create your views here.
 
 
@@ -43,26 +40,16 @@ class LogoutView(APIView):
         return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
 
 
-class ChangePasswordView(APIView):
-    permission_classes = [IsAuthenticated, ]
-
-    def post(self, request):
-        serializer = PasswordChangeSerializer(
-            context={'request': request}, data=request.data)
-        # Another way to write is as in Line 17
-        serializer.is_valid(raise_exception=True)
-        request.user.set_password(serializer.validated_data['new_password'])
-        request.user.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserList(generics.ListAPIView):
+class UserDetail(generics.RetrieveAPIView):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
 
-class UserDetail(generics.RetrieveUpdateAPIView):
+class UpdateProfileView(generics.UpdateAPIView):
+
     queryset = MyUser.objects.all()
-    serializer_class = UserSerializer
-    # permission_classes = [IsAuthenticated]
+    serializer_class = UpdateUserSerializer
+    permission_classes = (IsAuthenticated,)
